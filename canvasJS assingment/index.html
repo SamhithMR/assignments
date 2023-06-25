@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Bubbles App</title>
+  <style>
+    .container{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 100vh;
+      gap: 2rem;
+    }
+    #resetBtn{
+      padding: .8rem 1.6rem;
+      border: none;
+      border-radius: 10px;
+      background: #fbe224;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Bubble App</h1>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <button id="resetBtn">Reset</button>
+  </div>
+  <script>
+    // Get the canvas element and the 2D rendering context
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Circle and arrow properties
+    const circleColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00'];
+    const circleRadius = 30;
+    const arrowLength = 80;
+
+    // Circle positions
+    const circlePositions = [
+      { x: 80, y: 100 },
+      { x: 80, y: 200 },
+      { x: 80, y: 300 },
+      { x: 80, y: 400 }
+    ];
+
+    // Arrow positions (corresponding to circles)
+    const arrowPositions = [
+      { x: 400, y: 100 },
+      { x: 400, y: 200 },
+      { x: 400, y: 300 },
+      { x: 400, y: 400 }
+    ];
+
+    // Draw circles and arrows
+    function drawCirclesAndArrows() {
+      console.log("draw");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw circles
+      circlePositions.forEach((position, index) => {
+        ctx.beginPath();
+        ctx.arc(position.x, position.y, circleRadius, 0, Math.PI * 2);
+        ctx.fillStyle = circleColors[index];
+        ctx.fill();
+        ctx.closePath();
+      });
+      ctx.canvas.style.cursor = 'pointer';
+
+      // Draw arrows with arrowheads pointing towards the left
+      arrowPositions.forEach((position, index) => {
+        ctx.beginPath();
+        ctx.moveTo(position.x + arrowLength, position.y);
+        ctx.lineTo(position.x, position.y);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.closePath();
+
+        // Draw the arrowhead
+        ctx.beginPath();
+        ctx.moveTo(position.x, position.y);
+        ctx.lineTo(position.x + arrowLength * 0.3, position.y - arrowLength * 0.2);
+        ctx.lineTo(position.x + arrowLength * 0.3, position.y + arrowLength * 0.2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        ctx.closePath();
+      });
+    }
+
+    // Change circle color when hit by arrow
+    function changeCircleColor(index) {
+      ctx.beginPath();
+      ctx.arc(circlePositions[index].x, circlePositions[index].y, circleRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff00ff';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    // Animation for arrow movement
+function animateArrow(arrowIndex, circleIndex) {
+  const arrowPosition = arrowPositions[arrowIndex];
+  const targetPosition = circlePositions[circleIndex];
+
+  const dx = (targetPosition.x - arrowPosition.x) / 60;
+  const dy = (targetPosition.y - arrowPosition.y) / 60;
+
+  let count = 0;
+
+  function moveArrow() {
+    if (count < 54) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the entire canvas
+
+      arrowPosition.x += dx;
+      arrowPosition.y += dy;
+
+      // Draw circles
+      circlePositions.forEach((position, index) => {
+        ctx.beginPath();
+        ctx.arc(position.x, position.y, circleRadius, 0, Math.PI * 2);
+        ctx.fillStyle = circleColors[index];
+        ctx.fill();
+        ctx.closePath();
+      });
+      
+
+      // Draw arrows with arrowheads pointing towards the left
+      arrowPositions.forEach((position, index) => {
+        ctx.beginPath();
+        ctx.moveTo(position.x + arrowLength, position.y);
+        ctx.lineTo(position.x, position.y);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.closePath();
+
+        // Draw the arrowhead
+        ctx.beginPath();
+        ctx.moveTo(position.x, position.y);
+        ctx.lineTo(position.x + arrowLength * 0.3, position.y - arrowLength * 0.2);
+        ctx.lineTo(position.x + arrowLength * 0.3, position.y + arrowLength * 0.2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        ctx.closePath();
+      });
+
+      count++;
+      requestAnimationFrame(moveArrow);
+    } else {
+      changeCircleColor(circleIndex);
+    }
+  }
+
+  moveArrow();
+}
+
+    // Reset the canvas
+    function resetCanvas() {
+      console.log("clicked");
+      arrowPositions.forEach((position, index) => {
+    position.x = 400;
+    position.y = 100 + index * 100;
+  });
+      drawCirclesAndArrows();
+    }
+
+    // Handle click events on the canvas
+    function handleClick(e) {
+      const clickX = e.clientX - canvas.getBoundingClientRect().left;
+      const clickY = e.clientY - canvas.getBoundingClientRect().top;
+
+      circlePositions.forEach((position, index) => {
+        const distSq = Math.pow(position.x - clickX, 2) + Math.pow(position.y - clickY, 2);
+        if (distSq <= Math.pow(circleRadius, 2)) {
+          animateArrow(index, index);
+        }
+      });
+    }
+
+    // Event listeners
+    canvas.addEventListener('click', handleClick);
+    document.getElementById('resetBtn').addEventListener('click', resetCanvas);
+
+    // Initial drawing
+    drawCirclesAndArrows();
+  </script>
+</body>
+
+</html>
